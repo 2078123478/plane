@@ -17,7 +17,7 @@ import { CustomMenu, CustomSelect } from "@plane/ui";
 import { getFileURL } from "@plane/utils";
 // hooks
 import { useMember } from "@/hooks/store/use-member";
-import { useUser, useUserPermissions } from "@/hooks/store/user";
+import { useUser } from "@/hooks/store/user";
 
 export interface RowData extends Pick<TProjectMembership, "original_role"> {
   member: IWorkspaceMember;
@@ -95,14 +95,13 @@ export function NameColumn(props: NameProps) {
 }
 
 export const AccountTypeColumn = observer(function AccountTypeColumn(props: AccountTypeProps) {
-  const { rowData, projectId, workspaceSlug } = props;
+  const { rowData, currentProjectRole, projectId, workspaceSlug } = props;
   // store hooks
   const {
     project: { updateMemberRole },
     workspace: { getWorkspaceMemberDetails },
   } = useMember();
   const { data: currentUser } = useUser();
-  const { getProjectRoleByWorkspaceSlugAndProjectId } = useUserPermissions();
   // form info
   const {
     control,
@@ -111,26 +110,21 @@ export const AccountTypeColumn = observer(function AccountTypeColumn(props: Acco
   // derived values
   const roleLabel = ROLE[rowData.original_role ?? EUserPermissions.GUEST];
   const isCurrentUser = currentUser?.id === rowData.member.id;
-  const isRowDataWorkspaceAdmin = [EUserPermissions.ADMIN].includes(
-    Number(getWorkspaceMemberDetails(rowData.member.id)?.role) ?? EUserPermissions.GUEST
-  );
   const isCurrentUserWorkspaceAdmin = currentUser
     ? [EUserPermissions.ADMIN].includes(
         Number(getWorkspaceMemberDetails(currentUser.id)?.role) ?? EUserPermissions.GUEST
       )
     : false;
-  const currentProjectRole = getProjectRoleByWorkspaceSlugAndProjectId(workspaceSlug, projectId);
 
   const isCurrentUserProjectAdmin = currentProjectRole
     ? ![EUserPermissions.MEMBER, EUserPermissions.GUEST].includes(Number(currentProjectRole) ?? EUserPermissions.GUEST)
     : false;
 
   // logic
-  // Workspace admin can change his own role
-  // Project admin can change any role except his own and workspace admin's role
-  const isRoleEditable =
-    (isCurrentUserWorkspaceAdmin && isCurrentUser) ||
-    (isCurrentUserProjectAdmin && !isRowDataWorkspaceAdmin && !isCurrentUser);
+  // Project and workspace admins can manage project roles.
+  // Keep self-demotion restricted to workspace admins to avoid accidental project lockout.
+  const canManageProjectRoles = isCurrentUserWorkspaceAdmin || isCurrentUserProjectAdmin;
+  const isRoleEditable = canManageProjectRoles && (!isCurrentUser || isCurrentUserWorkspaceAdmin);
   const checkCurrentOptionWorkspaceRole = (value: string) => {
     const currentMemberWorkspaceRole = getWorkspaceMemberDetails(value)?.role as EUserPermissions | undefined;
     if (!value || !currentMemberWorkspaceRole) return ROLE;
