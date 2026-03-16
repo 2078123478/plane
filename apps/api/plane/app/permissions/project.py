@@ -121,11 +121,19 @@ class ProjectAdminPermission(BasePermission):
         if request.user.is_anonymous:
             return False
 
-        return ProjectMember.objects.filter(
+        if ProjectMember.objects.filter(
             workspace__slug=view.workspace_slug,
             member=request.user,
             role=ROLE.ADMIN.value,
             project_id=view.project_id,
+            is_active=True,
+        ).exists():
+            return True
+
+        return WorkspaceMember.objects.filter(
+            workspace__slug=view.workspace_slug,
+            member=request.user,
+            role=ROLE.ADMIN.value,
             is_active=True,
         ).exists()
 
