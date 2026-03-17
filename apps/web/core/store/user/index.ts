@@ -71,6 +71,28 @@ export class UserStore implements IUserStore {
   userService: UserService;
   authService: AuthService;
 
+  private syncCurrentUserInMemberMap = (userData?: Partial<IUser>) => {
+    const userId = userData?.id;
+    if (!userId || !this.store?.memberRoot) return;
+
+    const existingMemberData = this.store.memberRoot.memberMap?.[userId];
+    const hasAvatarUrl = userData ? Object.prototype.hasOwnProperty.call(userData, "avatar_url") : false;
+    const nextAvatarUrl = hasAvatarUrl
+      ? (userData as { avatar_url?: string | null }).avatar_url ?? ""
+      : existingMemberData?.avatar_url ?? "";
+
+    set(this.store.memberRoot.memberMap, [userId], {
+      id: userId,
+      avatar_url: nextAvatarUrl,
+      display_name: userData?.display_name ?? existingMemberData?.display_name ?? "",
+      email: userData?.email ?? existingMemberData?.email,
+      first_name: userData?.first_name ?? existingMemberData?.first_name ?? "",
+      is_bot: userData?.is_bot ?? existingMemberData?.is_bot ?? false,
+      last_name: userData?.last_name ?? existingMemberData?.last_name ?? "",
+      joining_date: existingMemberData?.joining_date ?? userData?.date_joined,
+    });
+  };
+
   constructor(private store: RootStore) {
     // stores
     this.userProfile = new ProfileStore(store);
@@ -124,6 +146,7 @@ export class UserStore implements IUserStore {
         ]);
         runInAction(() => {
           this.data = user;
+          this.syncCurrentUserInMemberMap(user);
           this.isLoading = false;
           this.isAuthenticated = true;
         });
@@ -153,22 +176,33 @@ export class UserStore implements IUserStore {
    * @returns {Promise<IUser>}
    */
   updateCurrentUser = async (data: Partial<IUser>): Promise<IUser> => {
-    const currentUserData = this.data;
+    const currentUserData = cloneDeep(this.data);
     try {
-      if (currentUserData) {
+      if (this.data) {
         Object.keys(data).forEach((key: string) => {
           const userKey: keyof IUser = key as keyof IUser;
           if (this.data) set(this.data, userKey, data[userKey]);
         });
+        this.syncCurrentUserInMemberMap(this.data);
       }
+
       const user = await this.userService.updateUser(data);
+
+      if (this.data) {
+        Object.keys(user).forEach((key: string) => {
+          const userKey: keyof IUser = key as keyof IUser;
+          if (this.data) set(this.data, userKey, user[userKey]);
+        });
+      } else {
+        this.data = user;
+      }
+      this.syncCurrentUserInMemberMap(this.data ?? user);
+
       return user;
     } catch (error) {
       if (currentUserData) {
-        Object.keys(currentUserData).forEach((key: string) => {
-          const userKey: keyof IUser = key as keyof IUser;
-          if (this.data) set(this.data, userKey, currentUserData[userKey]);
-        });
+        this.data = currentUserData;
+        this.syncCurrentUserInMemberMap(currentUserData);
       }
       runInAction(() => {
         this.error = {

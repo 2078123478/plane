@@ -56,6 +56,12 @@ class UserAssetsV2Endpoint(BaseAPIView):
                 user=True,
                 request=request,
             )
+            invalidate_cache_directly(
+                path="/api/users/me/profile/",
+                url_params=False,
+                user=True,
+                request=request,
+            )
             return
         # User Cover
         if entity_type == FileAsset.EntityTypeContext.USER_COVER:
@@ -70,6 +76,12 @@ class UserAssetsV2Endpoint(BaseAPIView):
             invalidate_cache_directly(path="/api/users/me/", url_params=False, user=True, request=request)
             invalidate_cache_directly(
                 path="/api/users/me/settings/",
+                url_params=False,
+                user=True,
+                request=request,
+            )
+            invalidate_cache_directly(
+                path="/api/users/me/profile/",
                 url_params=False,
                 user=True,
                 request=request,
@@ -90,6 +102,12 @@ class UserAssetsV2Endpoint(BaseAPIView):
                 user=True,
                 request=request,
             )
+            invalidate_cache_directly(
+                path="/api/users/me/profile/",
+                url_params=False,
+                user=True,
+                request=request,
+            )
             return
         # User Cover
         if entity_type == FileAsset.EntityTypeContext.USER_COVER:
@@ -99,6 +117,12 @@ class UserAssetsV2Endpoint(BaseAPIView):
             invalidate_cache_directly(path="/api/users/me/", url_params=False, user=True, request=request)
             invalidate_cache_directly(
                 path="/api/users/me/settings/",
+                url_params=False,
+                user=True,
+                request=request,
+            )
+            invalidate_cache_directly(
+                path="/api/users/me/profile/",
                 url_params=False,
                 user=True,
                 request=request,
