@@ -55,7 +55,8 @@ export interface IWorkspaceNotificationStore {
   getNotifications: (
     workspaceSlug: string,
     loader?: TNotificationLoader,
-    queryCursorType?: TNotificationQueryParamType
+    queryCursorType?: TNotificationQueryParamType,
+    tab?: TNotificationTab
   ) => Promise<TNotificationPaginatedInfo | undefined>;
   markAllNotificationsAsRead: (workspaceId: string) => Promise<void>;
 }
@@ -177,7 +178,10 @@ export class WorkspaceNotificationStore implements IWorkspaceNotificationStore {
    * @description generate notification query params
    * @returns { object }
    */
-  generateNotificationQueryParams = (paramType: TNotificationQueryParamType): TNotificationPaginatedInfoQueryParams => {
+  generateNotificationQueryParams = (
+    paramType: TNotificationQueryParamType,
+    tab: TNotificationTab = this.currentNotificationTab
+  ): TNotificationPaginatedInfoQueryParams => {
     const queryParamsType =
       Object.entries(this.filters.type)
         .filter(([, value]) => value)
@@ -205,7 +209,7 @@ export class WorkspaceNotificationStore implements IWorkspaceNotificationStore {
     // NOTE: This validation is required to show all the read and unread notifications in a single place it may change in future.
     queryParams.read = this.filters.read === true ? false : undefined;
 
-    if (this.currentNotificationTab === ENotificationTab.MENTIONS) queryParams.mentioned = true;
+    if (tab === ENotificationTab.MENTIONS) queryParams.mentioned = true;
 
     return queryParams;
   };
@@ -337,11 +341,12 @@ export class WorkspaceNotificationStore implements IWorkspaceNotificationStore {
   getNotifications = async (
     workspaceSlug: string,
     loader: TNotificationLoader = ENotificationLoader.INIT_LOADER,
-    queryParamType: TNotificationQueryParamType = ENotificationQueryParamType.INIT
+    queryParamType: TNotificationQueryParamType = ENotificationQueryParamType.INIT,
+    tab: TNotificationTab = this.currentNotificationTab
   ): Promise<TNotificationPaginatedInfo | undefined> => {
     this.loader = loader;
     try {
-      const queryParams = this.generateNotificationQueryParams(queryParamType);
+      const queryParams = this.generateNotificationQueryParams(queryParamType, tab);
       await this.getUnreadNotificationsCount(workspaceSlug);
       const notificationResponse = await workspaceNotificationService.fetchNotifications(workspaceSlug, queryParams);
       if (notificationResponse) {

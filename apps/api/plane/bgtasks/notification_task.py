@@ -9,6 +9,7 @@ from uuid import UUID
 
 
 # Module imports
+from plane.bgtasks.openclaw_task import enqueue_openclaw_inbox_checks
 from plane.db.models import (
     IssueMention,
     IssueSubscriber,
@@ -667,6 +668,10 @@ def notifications(
             )
             # Bulk create notifications
             Notification.objects.bulk_create(bulk_notifications, batch_size=100)
+            enqueue_openclaw_inbox_checks(
+                workspace_slug=project.workspace.slug,
+                receiver_ids=[notification.receiver_id for notification in bulk_notifications],
+            )
             EmailNotificationLog.objects.bulk_create(bulk_email_logs, batch_size=100, ignore_conflicts=True)
         return
     except Exception as e:
