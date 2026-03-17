@@ -56,8 +56,8 @@ export const APITokensProfileSettings = observer(function APITokensProfileSettin
     const normalizedAgentName = openClawAgentName.trim();
     if (openClawNotifyEnabled && normalizedAgentName === "") {
       setToast({
-        title: "Error!",
-        message: "Agent name is required when OpenClaw delivery is enabled.",
+        title: "保存失败",
+        message: "开启 OpenClaw 唤醒后，必须填写 Agent 名称。",
         type: TOAST_TYPE.ERROR,
       });
       return;
@@ -71,16 +71,16 @@ export const APITokensProfileSettings = observer(function APITokensProfileSettin
 
     if (updatedProfile) {
       setToast({
-        title: "Success!",
-        message: "OpenClaw agent settings updated successfully.",
+        title: "保存成功",
+        message: "OpenClaw 配置已更新。",
         type: TOAST_TYPE.SUCCESS,
       });
       return;
     }
 
     setToast({
-      title: "Error!",
-      message: "Failed to update OpenClaw agent settings.",
+      title: "保存失败",
+      message: "OpenClaw 配置更新失败，请稍后重试。",
       type: TOAST_TYPE.ERROR,
     });
   };
@@ -131,8 +131,8 @@ export const APITokensProfileSettings = observer(function APITokensProfileSettin
       </div>
       <div className="mt-10">
         <ProfileSettingsHeading
-          title="OpenClaw Agent Delivery"
-          description="Use an agent name, Plane will derive sessionKey as agent:<agent_name>:main."
+          title="OpenClaw Agent 送达"
+          description="填写 Agent 名称后，系统会自动生成 sessionKey：agent:<agent_name>:main。"
           control={
             <Button
               variant="primary"
@@ -141,19 +141,19 @@ export const APITokensProfileSettings = observer(function APITokensProfileSettin
               loading={isOpenClawSaving}
               disabled={!hasOpenClawChanges}
             >
-              Save
+              保存
             </Button>
           }
         />
         <div className="mt-3 flex flex-col gap-y-1">
           <SettingsControlItem
-            title="Enable OpenClaw wake-up"
-            description="When enabled, Plane will send a wake-up message to your OpenClaw agent on new inbox updates."
+            title="启用 OpenClaw 唤醒"
+            description="开启后，当你的收件箱有新通知时，Plane 会向对应 OpenClaw Agent 发送唤醒消息。"
             control={<ToggleSwitch value={openClawNotifyEnabled} onChange={setOpenClawNotifyEnabled} size="sm" />}
           />
           <SettingsControlItem
-            title="Agent name"
-            description="Allowed characters: letters, numbers, underscores, hyphens."
+            title="Agent 名称"
+            description="仅支持：字母、数字、下划线（_）、连字符（-）。"
             control={
               <Input
                 id="openclaw_agent_name"
@@ -161,15 +161,15 @@ export const APITokensProfileSettings = observer(function APITokensProfileSettin
                 type="text"
                 value={openClawAgentName}
                 onChange={(event) => setOpenClawAgentName(event.target.value)}
-                placeholder="e.g. ludehua"
+                placeholder="例如：ludehua"
                 className="w-[260px]"
                 maxLength={255}
               />
             }
           />
           <SettingsControlItem
-            title="Derived session key"
-            description="Generated automatically from your agent name."
+            title="生成的 Session Key"
+            description="根据 Agent 名称自动生成。"
             control={<code className="text-xs text-tertiary">{openClawSessionKeyPreview}</code>}
           />
         </div>
