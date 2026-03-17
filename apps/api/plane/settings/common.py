@@ -361,9 +361,14 @@ LIVE_URL = urljoin(LIVE_BASE_URL, LIVE_BASE_PATH) if LIVE_BASE_URL else None
 # WEB URL
 WEB_URL = os.environ.get("WEB_URL")
 
-OPENCLAW_NOTIFY_URL = os.environ.get("OPENCLAW_NOTIFY_URL", "").strip()
-OPENCLAW_NOTIFY_TOKEN = os.environ.get("OPENCLAW_NOTIFY_TOKEN", "").strip()
-OPENCLAW_NOTIFY_TIMEOUT = int(os.environ.get("OPENCLAW_NOTIFY_TIMEOUT", "5"))
+OPENCLAW_GATEWAY_URL = os.environ.get("OPENCLAW_GATEWAY_URL", os.environ.get("OPENCLAW_NOTIFY_URL", "")).strip()
+OPENCLAW_GATEWAY_TOKEN = os.environ.get(
+    "OPENCLAW_GATEWAY_TOKEN",
+    os.environ.get("OPENCLAW_NOTIFY_TOKEN", ""),
+).strip()
+OPENCLAW_GATEWAY_TIMEOUT = int(
+    os.environ.get("OPENCLAW_GATEWAY_TIMEOUT", os.environ.get("OPENCLAW_NOTIFY_TIMEOUT", "5"))
+)
 OPENCLAW_NOTIFY_COOLDOWN_SECONDS = int(os.environ.get("OPENCLAW_NOTIFY_COOLDOWN_SECONDS", "5"))
 
 HARD_DELETE_AFTER_DAYS = int(os.environ.get("HARD_DELETE_AFTER_DAYS", 60))

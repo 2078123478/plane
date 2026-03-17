@@ -2,6 +2,9 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # See the LICENSE file for details.
 
+# Python imports
+import re
+
 # Third party imports
 from rest_framework import serializers
 
@@ -199,6 +202,38 @@ class ResetPasswordSerializer(serializers.Serializer):
 
 
 class ProfileSerializer(BaseSerializer):
+    OPENCLAW_AGENT_NAME_PATTERN = re.compile(r"^[A-Za-z0-9_-]+$")
+
+    def validate_openclaw_agent_name(self, value):
+        if value is None:
+            return None
+
+        normalized_value = value.strip()
+        if normalized_value == "":
+            return None
+
+        if not self.OPENCLAW_AGENT_NAME_PATTERN.match(normalized_value):
+            raise serializers.ValidationError(
+                "Agent name can only contain letters, numbers, underscores, and hyphens."
+            )
+
+        return normalized_value
+
+    def validate(self, attrs):
+        if self.instance:
+            openclaw_notify_enabled = attrs.get("openclaw_notify_enabled", self.instance.openclaw_notify_enabled)
+            openclaw_agent_name = attrs.get("openclaw_agent_name", self.instance.openclaw_agent_name)
+        else:
+            openclaw_notify_enabled = attrs.get("openclaw_notify_enabled", False)
+            openclaw_agent_name = attrs.get("openclaw_agent_name")
+
+        if openclaw_notify_enabled and not openclaw_agent_name:
+            raise serializers.ValidationError(
+                {"openclaw_agent_name": "Agent name is required when OpenClaw notifications are enabled."}
+            )
+
+        return attrs
+
     class Meta:
         model = Profile
         fields = "__all__"

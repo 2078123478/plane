@@ -59,6 +59,8 @@ export class ProfileStore implements IUserProfileStore {
     billing_address: undefined,
     has_billing_address: false,
     has_marketing_email_consent: false,
+    openclaw_agent_name: null,
+    openclaw_notify_enabled: false,
     created_at: "",
     updated_at: "",
     language: "",

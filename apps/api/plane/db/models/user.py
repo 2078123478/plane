@@ -260,6 +260,8 @@ class Profile(TimeAuditModel):
     has_marketing_email_consent = models.BooleanField(default=False)
     is_subscribed_to_changelog = models.BooleanField(default=False)
     product_tour = models.JSONField(default=get_default_product_tour)
+    openclaw_agent_name = models.CharField(max_length=255, blank=True, null=True)
+    openclaw_notify_enabled = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = "Profile"

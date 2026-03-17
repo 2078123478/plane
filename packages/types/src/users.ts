@@ -78,6 +78,8 @@ export type TUserProfile = {
   billing_address: string | undefined;
   has_billing_address: boolean;
   has_marketing_email_consent: boolean;
+  openclaw_agent_name: string | null;
+  openclaw_notify_enabled: boolean;
   language: string;
   created_at: Date | string;
   updated_at: Date | string;
