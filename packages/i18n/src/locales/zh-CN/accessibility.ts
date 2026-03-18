@@ -27,7 +27,7 @@ export default {
       close_project_menu: "关闭项目菜单",
       collapse_sidebar: "折叠侧边栏",
       expand_sidebar: "展开侧边栏",
-      edition_badge: "打开付费计划模态框",
+      edition_badge: "查看付费方案",
     },
     auth_forms: {
       clear_email: "清除邮箱",
