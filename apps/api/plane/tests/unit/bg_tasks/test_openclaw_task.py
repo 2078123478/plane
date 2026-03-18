@@ -124,6 +124,7 @@ class TestOpenClawTask:
         OPENCLAW_GATEWAY_URL="https://openclaw.example/tools/invoke",
         OPENCLAW_GATEWAY_TOKEN="secret-token",
         OPENCLAW_GATEWAY_TIMEOUT=9,
+        OPENCLAW_DELIVERY_TIMEOUT_SECONDS=30,
     )
     @patch("plane.bgtasks.openclaw_task.requests.post")
     def test_notify_openclaw_inbox_check_posts_payload(self, mock_post):
@@ -143,6 +144,8 @@ class TestOpenClawTask:
         assert kwargs["json"]["tool"] == OPENCLAW_SESSIONS_SEND_TOOL
         assert kwargs["json"]["args"]["sessionKey"] == "agent:ludehua:main"
         assert kwargs["json"]["args"]["message"] == build_openclaw_message("test-workspace")
+        assert kwargs["json"]["args"]["timeoutSeconds"] == 30
+        assert kwargs["json"]["args"]["deliveryMode"] == "private"
         assert kwargs["headers"]["Authorization"] == "Bearer secret-token"
         assert kwargs["headers"]["X-Plane-Event"] == OPENCLAW_INBOX_CHECK_EVENT
         mock_response.raise_for_status.assert_called_once()

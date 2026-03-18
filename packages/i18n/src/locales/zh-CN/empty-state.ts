@@ -47,8 +47,8 @@ export default {
       cta_primary: "创建您的第一个工作项",
     },
     cycles: {
-      title: "在周期中分组和限时您的工作。",
-      description: "将工作分解为限时块,从项目截止日期倒推设置日期,并作为团队取得实质性进展。",
+      title: "在周期中按时间规划并组织工作。",
+      description: "将工作拆分为有明确时间范围的阶段,从项目截止日期倒推安排日期,并让团队持续取得可见进展。",
       cta_primary: "设置您的第一个周期",
     },
     cycle_work_items: {
@@ -96,12 +96,12 @@ export default {
       description: "归档不在您关注范围内的页面。需要时在此处访问它们。",
     },
     intake_sidebar: {
-      title: "记录接收请求",
+      title: "记录收集请求",
       description: "提交新请求以在项目工作流程中进行审查、优先排序和跟踪。",
-      cta_primary: "创建接收请求",
+      cta_primary: "创建收集请求",
     },
     intake_main: {
-      title: "选择一个接收工作项以查看其详细信息",
+      title: "选择一个收集项以查看其详细信息",
     },
   },
   workspace_empty_state: {
@@ -151,7 +151,7 @@ export default {
       title: "创建项目以在此处可视化项目指标。",
     },
     analytics_work_items: {
-      title: "创建包含工作项和受理人的项目,以开始在此处跟踪绩效、进度和团队影响。",
+      title: "创建包含工作项和负责人的项目,以开始在此处跟踪绩效、进度和团队影响。",
     },
     analytics_no_cycle: {
       title: "创建周期以将工作组织成有时限的阶段并跟踪冲刺进度。",
@@ -160,7 +160,7 @@ export default {
       title: "创建模块以组织工作并跟踪不同阶段的进度。",
     },
     analytics_no_intake: {
-      title: "设置接收以管理传入请求并跟踪它们的接受和拒绝情况",
+      title: "设置收集功能以管理传入请求并跟踪它们的接受和拒绝情况",
     },
   },
   settings_empty_state: {

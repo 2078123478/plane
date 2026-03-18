@@ -80,7 +80,7 @@ export default {
         },
       },
       unique_code: {
-        label: "唯一码",
+        label: "验证码",
         placeholder: "123456",
         paste_code: "粘贴发送到您邮箱的验证码",
         requesting_new_code: "正在请求新验证码",
@@ -92,7 +92,7 @@ export default {
       new_to_plane: "首次使用 Plane？",
       back_to_sign_in: "返回登录",
       resend_in: "{seconds} 秒后重新发送",
-      sign_in_with_unique_code: "使用唯一码登录",
+      sign_in_with_unique_code: "使用验证码登录",
       forgot_password: "忘记密码？",
     },
     sign_up: {
@@ -109,7 +109,7 @@ export default {
           },
           unique_code: {
             header: "注册",
-            sub_header: "使用发送到上述邮箱的唯一码注册。",
+            sub_header: "使用发送到上述邮箱的验证码注册。",
           },
         },
       },
@@ -133,7 +133,7 @@ export default {
           },
           unique_code: {
             header: "登录或注册",
-            sub_header: "使用发送到上述邮箱的唯一码登录。",
+            sub_header: "使用发送到上述邮箱的验证码登录。",
           },
         },
       },
@@ -1887,7 +1887,7 @@ export default {
     members: {
       label: "成员",
       project_lead: "项目负责人",
-      default_assignee: "默认受理人",
+      default_assignee: "默认负责人",
       guest_super_permissions: {
         title: "为访客用户授予查看所有工作项的权限：",
         sub_heading: "这将允许访客查看所有项目工作项。",
@@ -2059,11 +2059,11 @@ export default {
         toggle_description: "项目成员将能够创建和编辑页面。",
       },
       intake: {
-        title: "接收",
-        short_title: "接收",
-        description: "让非成员分享错误、反馈和建议；而不会中断您的工作流程。",
-        toggle_title: "启用接收",
-        toggle_description: "允许项目成员在应用中创建接收请求。",
+        title: "收集",
+        short_title: "收集",
+        description: "让非成员提交错误、反馈和建议，而不会打断您的工作流程。",
+        toggle_title: "启用收集",
+        toggle_description: "允许项目成员在应用中创建收集请求。",
       },
     },
   },
@@ -2088,7 +2088,7 @@ export default {
       progress: "进度",
       chart: "燃尽图",
       priority_issue: "优先工作项",
-      assignees: "受理人",
+      assignees: "负责人",
       issue_burndown: "工作项燃尽",
       ideal: "理想",
       current: "当前",
@@ -2159,9 +2159,9 @@ export default {
     },
     empty_state: {
       general: {
-        title: "在周期中分组和时间框定您的工作。",
+        title: "在周期中按时间规划并组织工作。",
         description:
-          "将工作按时间框分解，从项目截止日期倒推设置日期，并作为团队取得切实的进展。",
+          "将工作拆分为有明确时间范围的阶段，从项目截止日期倒推安排日期，并让团队持续取得可见进展。",
         primary_button: {
           text: "设置您的第一个周期",
           comic: {
@@ -2173,7 +2173,7 @@ export default {
       },
       no_issues: {
         title: "尚未向周期添加工作项",
-        description: "添加或创建您希望在此周期内时间框定和交付的工作项",
+        description: "添加或创建您希望在此周期内完成交付的工作项",
         primary_button: {
           text: "创建新工作项",
         },

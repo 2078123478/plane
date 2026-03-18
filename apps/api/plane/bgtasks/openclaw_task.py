@@ -19,6 +19,7 @@ from plane.utils.exception_logger import log_exception
 logger = logging.getLogger("plane.worker")
 OPENCLAW_INBOX_CHECK_EVENT = "plane_inbox_check"
 OPENCLAW_SESSIONS_SEND_TOOL = "sessions_send"
+OPENCLAW_DELIVERY_MODE = "private"
 OPENCLAW_SUMMARY_PREVIEW_LIMIT = 3
 OPENCLAW_MESSAGE_TEXT_LIMIT = 80
 UNKNOWN_MEMBER_LABEL = "某位成员"
@@ -341,6 +342,8 @@ def notify_openclaw_inbox_check(self, workspace_slug: str, receiver_id: str, ses
         "args": {
             "sessionKey": session_key,
             "message": message,
+            "timeoutSeconds": settings.OPENCLAW_DELIVERY_TIMEOUT_SECONDS,
+            "deliveryMode": OPENCLAW_DELIVERY_MODE,
         },
     }
 
