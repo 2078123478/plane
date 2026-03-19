@@ -45,10 +45,10 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,cjs,mjs,cts,mts,json,css,md}": [
-      "pnpm exec prettier --write --ignore-unknown"
+      "corepack pnpm exec prettier --write --ignore-unknown"
     ],
     "*.{js,jsx,ts,tsx,cjs,mjs,cts,mts}": [
-      "pnpm exec eslint --fix --max-warnings=0 --no-warn-ignored"
+      "corepack pnpm exec eslint --fix --max-warnings=0 --no-warn-ignored"
     ]
   },
   "pnpm": {
