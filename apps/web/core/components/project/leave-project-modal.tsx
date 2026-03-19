@@ -27,6 +27,11 @@ const defaultValues: FormData = {
   confirmLeave: "",
 };
 
+// This phrase is matched literally by the destructive action and should stay in English.
+const PROJECT_LEAVE_CONFIRMATION_TEXT = "leave project";
+
+const normalizeConfirmationText = (value: string) => value.trim().toLowerCase();
+
 export interface ILeaveProjectModal {
   project: IProject;
   isOpen: boolean;
@@ -58,7 +63,7 @@ export const LeaveProjectModal = observer(function LeaveProjectModal(props: ILea
 
     if (data) {
       if (data.projectName === project?.name) {
-        if (data.confirmLeave === "Leave Project") {
+        if (normalizeConfirmationText(data.confirmLeave) === PROJECT_LEAVE_CONFIRMATION_TEXT) {
           router.push(`/${workspaceSlug}/projects`);
           return leaveProject(workspaceSlug.toString(), project.id)
             .then(() => {
@@ -75,7 +80,7 @@ export const LeaveProjectModal = observer(function LeaveProjectModal(props: ILea
           setToast({
             type: TOAST_TYPE.ERROR,
             title: "Error!",
-            message: "Please confirm leaving the project by typing the 'Leave Project'.",
+            message: `Please confirm leaving the project by typing '${PROJECT_LEAVE_CONFIRMATION_TEXT}'.`,
           });
         }
       } else {
@@ -142,7 +147,8 @@ export const LeaveProjectModal = observer(function LeaveProjectModal(props: ILea
 
         <div className="text-secondary">
           <p className="text-13">
-            To confirm, type <span className="font-medium text-primary">Leave Project</span> below:
+            To confirm, type{" "}
+            <span className="font-mono font-medium text-primary">{PROJECT_LEAVE_CONFIRMATION_TEXT}</span> below:
           </p>
           <Controller
             control={control}
@@ -156,7 +162,7 @@ export const LeaveProjectModal = observer(function LeaveProjectModal(props: ILea
                 onChange={onChange}
                 ref={ref}
                 hasError={Boolean(errors.confirmLeave)}
-                placeholder="Enter 'leave project'"
+                placeholder={PROJECT_LEAVE_CONFIRMATION_TEXT}
                 className="mt-2 w-full"
               />
             )}

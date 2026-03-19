@@ -29,6 +29,11 @@ const defaultValues = {
   confirmDelete: "",
 };
 
+// This phrase is matched literally by the destructive action and should stay in English.
+const WORKSPACE_DELETE_CONFIRMATION_TEXT = "delete my workspace";
+
+const normalizeConfirmationText = (value: string) => value.trim().toLowerCase();
+
 export const DeleteWorkspaceForm = observer(function DeleteWorkspaceForm(props: Props) {
   const { data, onClose } = props;
   // router
@@ -47,7 +52,9 @@ export const DeleteWorkspaceForm = observer(function DeleteWorkspaceForm(props: 
     watch,
   } = useForm({ defaultValues });
 
-  const canDelete = watch("workspaceName") === data?.name && watch("confirmDelete") === "delete my workspace";
+  const canDelete =
+    watch("workspaceName") === data?.name &&
+    normalizeConfirmationText(watch("confirmDelete")) === WORKSPACE_DELETE_CONFIRMATION_TEXT;
 
   const handleClose = () => {
     const timer = setTimeout(() => {
@@ -125,7 +132,7 @@ export const DeleteWorkspaceForm = observer(function DeleteWorkspaceForm(props: 
           <div className="text-secondary mt-4">
             <p className="text-body-xs-regular">
               For final confirmation, type{" "}
-              <span className="text-body-xs-medium text-primary">delete my workspace </span>
+              <span className="font-mono text-body-xs-medium text-primary">{WORKSPACE_DELETE_CONFIRMATION_TEXT}</span>
               below.
             </p>
             <Controller
@@ -140,7 +147,7 @@ export const DeleteWorkspaceForm = observer(function DeleteWorkspaceForm(props: 
                   onChange={onChange}
                   ref={ref}
                   hasError={Boolean(errors.confirmDelete)}
-                  placeholder=""
+                  placeholder={WORKSPACE_DELETE_CONFIRMATION_TEXT}
                   className="mt-2 w-full"
                   autoComplete="off"
                 />

@@ -27,6 +27,11 @@ const defaultValues = {
   confirmDelete: "",
 };
 
+// This phrase is matched literally by the destructive action and should stay in English.
+const PROJECT_DELETE_CONFIRMATION_TEXT = "delete my project";
+
+const normalizeConfirmationText = (value: string) => value.trim().toLowerCase();
+
 export function DeleteProjectModal(props: DeleteProjectModal) {
   const { isOpen, project, onClose } = props;
   // store hooks
@@ -43,7 +48,9 @@ export function DeleteProjectModal(props: DeleteProjectModal) {
     watch,
   } = useForm({ defaultValues });
 
-  const canDelete = watch("projectName") === project?.name && watch("confirmDelete") === "delete my project";
+  const canDelete =
+    watch("projectName") === project?.name &&
+    normalizeConfirmationText(watch("confirmDelete")) === PROJECT_DELETE_CONFIRMATION_TEXT;
 
   const handleClose = () => {
     const timer = setTimeout(() => {
@@ -117,7 +124,8 @@ export function DeleteProjectModal(props: DeleteProjectModal) {
         </div>
         <div className="text-secondary">
           <p className="text-13">
-            To confirm, type <span className="font-medium text-primary">delete my project</span> below:
+            To confirm, type{" "}
+            <span className="font-mono font-medium text-primary">{PROJECT_DELETE_CONFIRMATION_TEXT}</span> below:
           </p>
           <Controller
             control={control}
@@ -131,7 +139,7 @@ export function DeleteProjectModal(props: DeleteProjectModal) {
                 onChange={onChange}
                 ref={ref}
                 hasError={Boolean(errors.confirmDelete)}
-                placeholder="Enter 'delete my project'"
+                placeholder={PROJECT_DELETE_CONFIRMATION_TEXT}
                 className="mt-2 w-full"
                 autoComplete="off"
               />

@@ -429,7 +429,7 @@ export default {
   you_can_see_here_if_someone_invites_you_to_a_workspace:
     "如果有人邀请您加入工作区，您可以在这里看到",
   back_to_home: "回首页",
-  workspace_name: "工作区名称",
+  workspace_name: "workspace-name",
   deactivate_your_account: "停用账号",
   deactivate_your_account_description:
     "停用后，您将无法被分配任务，也不会产生费用。如需重新激活，需使用该邮箱接收新的工作区邀请。",
