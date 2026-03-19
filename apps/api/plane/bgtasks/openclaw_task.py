@@ -29,12 +29,16 @@ UNKNOWN_MEMBER_LABEL = "某位成员"
 UNKNOWN_ISSUE_LABEL = "任务"
 UNKNOWN_PROJECT_LABEL = "未归属项目"
 UNKNOWN_WORKSPACE_LABEL = "未知"
+OPENCLAW_SYSTEM_MARKER = "[PLANE_SYSTEM_NOTIFICATION]"
+OPENCLAW_SYSTEM_SOURCE = "plane-webhook"
+OPENCLAW_SYSTEM_MESSAGE_CLASS = "system_notification"
+OPENCLAW_SYSTEM_REPLY_POLICY = "no_direct_reply"
 OPENCLAW_SYSTEM_SOURCE_LABEL = "Plane任务管理系统"
 
 ACTIVITY_LABEL_BY_FIELD = {
     "state": "更新了状态",
     "comment": "新增了评论",
-    "mention": "提及了你",
+    "mention": "提及了账号持有人",
     "assignee": "更新了负责人",
     "assignees": "更新了负责人",
     "priority": "更新了优先级",
@@ -229,7 +233,7 @@ def _build_activity_label(notification: Notification) -> str:
     verb = _normalize_activity_verb(notification)
 
     if "mentioned" in sender or field == "mention":
-        return "提及了你"
+        return "提及了账号持有人"
 
     field_activity_label = ACTIVITY_LABEL_BY_FIELD.get(field)
     if field_activity_label:
@@ -295,6 +299,10 @@ def build_openclaw_message(
     unread_count = unread_count if unread_count is not None else max(1, len(notifications))
     workspace_summary = _build_workspace_summary(workspace_slug=workspace_slug, notifications=notifications)
     lines = [
+        OPENCLAW_SYSTEM_MARKER,
+        f"source: {OPENCLAW_SYSTEM_SOURCE}",
+        f"class: {OPENCLAW_SYSTEM_MESSAGE_CLASS}",
+        f"reply_policy: {OPENCLAW_SYSTEM_REPLY_POLICY}",
         "=== 系统通知 ===",
         f"来源: {OPENCLAW_SYSTEM_SOURCE_LABEL}",
         f"工作区: {workspace_summary}",
@@ -302,7 +310,7 @@ def build_openclaw_message(
         "",
         f"【{OPENCLAW_SYSTEM_SOURCE_LABEL}通知】",
         "",
-        f"你主人的账号收到了 {unread_count} 条新的工作项变动通知。",
+        f"账号持有人收到了 {unread_count} 条新的工作项变动通知。",
     ]
 
     if notifications:

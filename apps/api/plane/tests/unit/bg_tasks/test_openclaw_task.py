@@ -224,11 +224,15 @@ class TestOpenClawTask:
         )
 
         actor_label = create_user.display_name or create_user.first_name
+        assert "[PLANE_SYSTEM_NOTIFICATION]" in message
+        assert "source: plane-webhook" in message
+        assert "class: system_notification" in message
+        assert "reply_policy: no_direct_reply" in message
         assert "=== 系统通知 ===" in message
         assert "来源: Plane任务管理系统" in message
         assert f"工作区: {workspace.slug}" in message
         assert "【Plane任务管理系统通知】" in message
-        assert "你主人的账号收到了 1 条新的工作项变动通知。" in message
+        assert "账号持有人收到了 1 条新的工作项变动通知。" in message
         assert actor_label in message
         assert "评论内容：测试内容，测试通知链路走通。" in message
         assert "工作项：TP-123 Test notification flow" in message
