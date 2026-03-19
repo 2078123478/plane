@@ -360,6 +360,7 @@ LIVE_URL = urljoin(LIVE_BASE_URL, LIVE_BASE_PATH) if LIVE_BASE_URL else None
 
 # WEB URL
 WEB_URL = os.environ.get("WEB_URL")
+USE_REQUEST_HOST_FOR_APP_URLS = os.environ.get("USE_REQUEST_HOST_FOR_APP_URLS", "0") == "1"
 
 OPENCLAW_GATEWAY_URL = os.environ.get("OPENCLAW_GATEWAY_URL", os.environ.get("OPENCLAW_NOTIFY_URL", "")).strip()
 OPENCLAW_GATEWAY_TOKEN = os.environ.get(

@@ -134,6 +134,8 @@ services:
     command: ./bin/docker-entrypoint-api-local.sh
     env_file:
       - ./apps/api/.env
+    environment:
+      USE_REQUEST_HOST_FOR_APP_URLS: ${USE_REQUEST_HOST_FOR_APP_URLS:-1}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -157,6 +159,8 @@ services:
     command: ./bin/docker-entrypoint-worker.sh
     env_file:
       - ./apps/api/.env
+    environment:
+      USE_REQUEST_HOST_FOR_APP_URLS: ${USE_REQUEST_HOST_FOR_APP_URLS:-1}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -178,6 +182,8 @@ services:
     command: ./bin/docker-entrypoint-beat.sh
     env_file:
       - ./apps/api/.env
+    environment:
+      USE_REQUEST_HOST_FOR_APP_URLS: ${USE_REQUEST_HOST_FOR_APP_URLS:-1}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -199,6 +205,8 @@ services:
     command: ./bin/docker-entrypoint-migrator.sh --settings=plane.settings.local
     env_file:
       - ./apps/api/.env
+    environment:
+      USE_REQUEST_HOST_FOR_APP_URLS: ${USE_REQUEST_HOST_FOR_APP_URLS:-1}
     depends_on:
       - plane-db
       - plane-redis

@@ -150,6 +150,87 @@ class TestOpenClawTask:
         assert kwargs["headers"]["X-Plane-Event"] == OPENCLAW_INBOX_CHECK_EVENT
         mock_response.raise_for_status.assert_called_once()
 
+    @override_settings(
+        OPENCLAW_GATEWAY_URL="https://openclaw.example/api/openclaw/plane-notify",
+        OPENCLAW_GATEWAY_TOKEN="secret-token",
+        OPENCLAW_GATEWAY_TIMEOUT=9,
+        OPENCLAW_DELIVERY_TIMEOUT_SECONDS=30,
+    )
+    @patch("plane.bgtasks.openclaw_task.requests.post")
+    def test_notify_openclaw_inbox_check_posts_relay_payload(self, mock_post):
+        mock_response = MagicMock()
+        mock_post.return_value = mock_response
+
+        notify_openclaw_inbox_check.run(
+            workspace_slug="test-workspace",
+            receiver_id="00000000-0000-0000-0000-000000000001",
+            session_key="agent:ludehua:main",
+        )
+
+        mock_post.assert_called_once()
+        args, kwargs = mock_post.call_args
+        assert args[0] == "https://openclaw.example/api/openclaw/plane-notify"
+        assert kwargs["timeout"] == 9
+        assert kwargs["json"]["sessionKey"] == "agent:ludehua:main"
+        assert kwargs["json"]["message"] == build_openclaw_message("test-workspace")
+        assert kwargs["json"]["timeoutSeconds"] == 30
+        assert "tool" not in kwargs["json"]
+        assert kwargs["headers"]["Authorization"] == "Bearer secret-token"
+        assert kwargs["headers"]["X-Plane-Event"] == OPENCLAW_INBOX_CHECK_EVENT
+        mock_response.raise_for_status.assert_called_once()
+
+    @pytest.mark.django_db
+    def test_build_openclaw_message_includes_notification_content(self, workspace, create_user):
+        project = Project.objects.create(
+            name="Test Project",
+            identifier="TP",
+            workspace=workspace,
+            created_by=create_user,
+        )
+        notification = Notification(
+            workspace=workspace,
+            project=project,
+            sender="in_app:issue_activities:subscribed",
+            triggered_by=create_user,
+            receiver=create_user,
+            entity_identifier=uuid.uuid4(),
+            entity_name="issue",
+            title="Commented",
+            data={
+                "issue": {
+                    "id": str(uuid.uuid4()),
+                    "name": "Test notification flow",
+                    "identifier": "TP",
+                    "sequence_id": 123,
+                    "state_name": "Todo",
+                    "state_group": "backlog",
+                },
+                "issue_activity": {
+                    "id": str(uuid.uuid4()),
+                    "verb": "created",
+                    "field": "comment",
+                    "actor": str(create_user.id),
+                    "new_value": "<p>测试内容，测试通知链路走通。</p>",
+                    "old_value": "",
+                    "issue_comment": "测试内容，测试通知链路走通。",
+                },
+            },
+        )
+
+        message = build_openclaw_message(
+            workspace_slug=workspace.slug,
+            unread_count=1,
+            notifications=[notification],
+        )
+
+        actor_label = create_user.display_name or create_user.first_name
+        assert actor_label in message
+        assert "评论内容：测试内容，测试通知链路走通。" in message
+        assert "工作项：TP-123 Test notification flow" in message
+        assert "项目：Test Project" in message
+        assert "如有必要，请主动查看相关工作项变动并提醒主人。" in message
+        assert "Inbox" not in message
+
     @pytest.mark.django_db
     @patch("plane.bgtasks.notification_task.enqueue_openclaw_inbox_checks")
     def test_notifications_enqueues_openclaw_after_creating_notifications(

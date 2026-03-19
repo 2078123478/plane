@@ -4,7 +4,7 @@
 
 # Django imports
 from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import DisallowedHost, ImproperlyConfigured
 from django.http import HttpRequest
 
 # Third party imports
@@ -12,6 +12,23 @@ from rest_framework.request import Request
 
 # Module imports
 from plane.utils.ip_address import get_client_ip
+
+
+def get_request_origin(request: Request | HttpRequest) -> str | None:
+    """Return the origin derived from the active request when enabled."""
+    if not getattr(settings, "USE_REQUEST_HOST_FOR_APP_URLS", False):
+        return None
+
+    try:
+        host = request.get_host()
+    except DisallowedHost:
+        return None
+
+    if not host:
+        return None
+
+    scheme = "https" if request.is_secure() else "http"
+    return f"{scheme}://{host}"
 
 
 def base_host(
@@ -22,7 +39,7 @@ def base_host(
 ) -> str:
     """Utility function to return host / origin from the request"""
     # Calculate the base origin from request
-    base_origin = settings.WEB_URL or settings.APP_BASE_URL
+    base_origin = get_request_origin(request) or settings.WEB_URL or settings.APP_BASE_URL
 
     if not base_origin:
         raise ImproperlyConfigured("APP_BASE_URL or WEB_URL is not set")

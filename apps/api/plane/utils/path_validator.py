@@ -47,9 +47,9 @@ def _contains_suspicious_patterns(path: str) -> bool:
     return False
 
 
-def get_allowed_hosts() -> list[str]:
+def get_allowed_hosts(base_url: str | None = None) -> list[str]:
     """Get the allowed hosts from the settings."""
-    base_origin = settings.WEB_URL or settings.APP_BASE_URL
+    base_origin = base_url or settings.WEB_URL or settings.APP_BASE_URL
 
     allowed_hosts = []
     if base_origin:
@@ -138,7 +138,7 @@ def get_safe_redirect_url(base_url: str, next_path: str = "", params: dict = {})
         url = base_url
 
     # Check if the URL is allowed
-    if url_has_allowed_host_and_scheme(url, allowed_hosts=get_allowed_hosts()):
+    if url_has_allowed_host_and_scheme(url, allowed_hosts=get_allowed_hosts(base_url=base_url)):
         return url
 
     # Return the base URL if the URL is not allowed

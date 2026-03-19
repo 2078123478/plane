@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # See the LICENSE file for details.
 
+import html
 import hashlib
 import logging
 import uuid
@@ -10,6 +11,7 @@ from typing import Iterable
 import requests
 from celery import shared_task
 from django.conf import settings
+from django.utils.html import strip_tags
 
 from plane.db.models import Notification, User
 from plane.settings.redis import redis_instance
@@ -18,6 +20,7 @@ from plane.utils.exception_logger import log_exception
 
 logger = logging.getLogger("plane.worker")
 OPENCLAW_INBOX_CHECK_EVENT = "plane_inbox_check"
+OPENCLAW_HTTP_INVOKE_SUFFIX = "/tools/invoke"
 OPENCLAW_SESSIONS_SEND_TOOL = "sessions_send"
 OPENCLAW_DELIVERY_MODE = "private"
 OPENCLAW_SUMMARY_PREVIEW_LIMIT = 3
@@ -30,9 +33,12 @@ UNKNOWN_WORKSPACE_LABEL = "未知"
 ACTIVITY_LABEL_BY_FIELD = {
     "state": "更新了状态",
     "comment": "新增了评论",
+    "mention": "提及了你",
     "assignee": "更新了负责人",
+    "assignees": "更新了负责人",
     "priority": "更新了优先级",
     "label": "更新了标签",
+    "labels": "更新了标签",
 }
 
 ACTIVITY_LABEL_BY_VERB = {
@@ -40,9 +46,29 @@ ACTIVITY_LABEL_BY_VERB = {
     "deleted": "删除了任务动态",
 }
 
+ACTIVITY_VALUE_LABEL_BY_FIELD = {
+    "state": "状态",
+    "comment": "评论内容",
+    "mention": "提及内容",
+    "assignee": "负责人",
+    "assignees": "负责人",
+    "priority": "优先级",
+    "label": "标签",
+    "labels": "标签",
+    "description": "描述",
+    "start_date": "开始日期",
+    "target_date": "截止日期",
+    "parent": "父任务",
+}
+
 
 def openclaw_notifications_enabled() -> bool:
     return bool(getattr(settings, "OPENCLAW_GATEWAY_URL", ""))
+
+
+def uses_openclaw_legacy_tool_invoke() -> bool:
+    gateway_url = str(getattr(settings, "OPENCLAW_GATEWAY_URL", "") or "").strip().rstrip("/")
+    return gateway_url.endswith(OPENCLAW_HTTP_INVOKE_SUFFIX)
 
 
 def get_openclaw_cooldown_key(workspace_slug: str, receiver_id: str) -> str:
@@ -162,11 +188,44 @@ def _build_project_label(notification: Notification) -> str:
     return UNKNOWN_PROJECT_LABEL
 
 
+def _normalize_activity_field(notification: Notification) -> str:
+    issue_activity = (notification.data or {}).get("issue_activity") or {}
+    return (issue_activity.get("field") or "").strip().lower()
+
+
+def _normalize_activity_verb(notification: Notification) -> str:
+    issue_activity = (notification.data or {}).get("issue_activity") or {}
+    return (issue_activity.get("verb") or "").strip().lower()
+
+
+def _clean_notification_value(value: str | None, limit: int = OPENCLAW_MESSAGE_TEXT_LIMIT) -> str:
+    normalized_value = html.unescape(strip_tags(value or ""))
+    normalized_value = " ".join(normalized_value.split())
+    return _truncate_text(normalized_value, limit=limit)
+
+
+def _extract_activity_value(notification: Notification) -> str:
+    issue_activity = (notification.data or {}).get("issue_activity") or {}
+    sender = notification.sender or ""
+    field = _normalize_activity_field(notification)
+    new_value = issue_activity.get("new_value")
+    old_value = issue_activity.get("old_value")
+    issue_comment = issue_activity.get("issue_comment")
+
+    if "mentioned" in sender or field == "mention":
+        return _clean_notification_value(issue_comment or new_value, limit=120)
+
+    if field == "comment":
+        return _clean_notification_value(issue_comment or new_value, limit=120)
+
+    preferred_value = new_value if str(new_value or "").strip() not in {"", "None"} else old_value
+    return _clean_notification_value(preferred_value, limit=80)
+
+
 def _build_activity_label(notification: Notification) -> str:
     sender = notification.sender or ""
-    issue_activity = (notification.data or {}).get("issue_activity") or {}
-    field = (issue_activity.get("field") or "").strip().lower()
-    verb = (issue_activity.get("verb") or "").strip().lower()
+    field = _normalize_activity_field(notification)
+    verb = _normalize_activity_verb(notification)
 
     if "mentioned" in sender or field == "mention":
         return "提及了你"
@@ -180,6 +239,18 @@ def _build_activity_label(notification: Notification) -> str:
         return verb_activity_label
 
     return "更新了任务信息"
+
+
+def _build_activity_summary(notification: Notification) -> str:
+    actor_label = _build_actor_label(notification)
+    activity_label = _build_activity_label(notification)
+    activity_field = _normalize_activity_field(notification)
+    activity_value = _extract_activity_value(notification)
+    value_label = ACTIVITY_VALUE_LABEL_BY_FIELD.get(activity_field, "内容")
+
+    if activity_value:
+        return f"{actor_label} {activity_label}，{value_label}：{activity_value}"
+    return f"{actor_label} {activity_label}"
 
 
 def _get_recent_unread_notifications(
@@ -224,20 +295,18 @@ def build_openclaw_message(
     workspace_summary = _build_workspace_summary(workspace_slug=workspace_slug, notifications=notifications)
     lines = [
         "【Plane 系统通知】",
-        "来源：Plane 系统通知",
-        f"你有 {unread_count} 条未读 Inbox 更新。",
-        f"工作区：{workspace_summary}",
+        f"涉及工作区：{workspace_summary}",
+        f"你收到了 {unread_count} 条新的工作项变动通知。",
     ]
 
     if notifications:
         lines.append("最近变动：")
         for index, notification in enumerate(notifications, start=1):
-            lines.append(
-                f"{index}. {_build_actor_label(notification)} · {_build_project_label(notification)} · "
-                f"{_build_issue_label(notification)} · {_build_activity_label(notification)}"
-            )
+            lines.append(f"{index}. {_build_activity_summary(notification)}")
+            lines.append(f"   工作项：{_build_issue_label(notification)}")
+            lines.append(f"   项目：{_build_project_label(notification)}")
 
-    lines.append("请在 Plane Inbox 中查看详情。")
+    lines.append("如有必要，请主动查看相关工作项变动并提醒主人。")
     return "\n".join(lines)
 
 
@@ -251,6 +320,28 @@ def build_openclaw_message_signature(
         + "|".join(str(notification.id) for notification in notifications)
     )
     return hashlib.sha1(signature_input.encode("utf-8")).hexdigest()
+
+
+def build_openclaw_delivery_args(session_key: str, message: str) -> dict:
+    return {
+        "sessionKey": session_key,
+        "message": message,
+        "timeoutSeconds": settings.OPENCLAW_DELIVERY_TIMEOUT_SECONDS,
+    }
+
+
+def build_openclaw_delivery_payload(session_key: str, message: str) -> dict:
+    delivery_args = build_openclaw_delivery_args(session_key=session_key, message=message)
+    if not uses_openclaw_legacy_tool_invoke():
+        return delivery_args
+
+    return {
+        "tool": OPENCLAW_SESSIONS_SEND_TOOL,
+        "args": {
+            **delivery_args,
+            "deliveryMode": OPENCLAW_DELIVERY_MODE,
+        },
+    }
 
 
 def resolve_openclaw_targets(receiver_ids: Iterable[str]) -> list[dict[str, str]]:
@@ -337,15 +428,7 @@ def notify_openclaw_inbox_check(self, workspace_slug: str, receiver_id: str, ses
     if settings.OPENCLAW_GATEWAY_TOKEN:
         headers["Authorization"] = f"Bearer {settings.OPENCLAW_GATEWAY_TOKEN}"
 
-    payload = {
-        "tool": OPENCLAW_SESSIONS_SEND_TOOL,
-        "args": {
-            "sessionKey": session_key,
-            "message": message,
-            "timeoutSeconds": settings.OPENCLAW_DELIVERY_TIMEOUT_SECONDS,
-            "deliveryMode": OPENCLAW_DELIVERY_MODE,
-        },
-    }
+    payload = build_openclaw_delivery_payload(session_key=session_key, message=message)
 
     try:
         response = requests.post(
