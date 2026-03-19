@@ -224,11 +224,18 @@ class TestOpenClawTask:
         )
 
         actor_label = create_user.display_name or create_user.first_name
+        assert "=== 系统通知 ===" in message
+        assert "来源: Plane任务管理系统" in message
+        assert f"工作区: {workspace.slug}" in message
+        assert "【Plane任务管理系统通知】" in message
+        assert "你主人的账号收到了 1 条新的工作项变动通知。" in message
         assert actor_label in message
         assert "评论内容：测试内容，测试通知链路走通。" in message
         assert "工作项：TP-123 Test notification flow" in message
         assert "项目：Test Project" in message
         assert "如有必要，请主动查看相关工作项变动并提醒主人。" in message
+        assert "注意这条消息来自plane系统通知，请保持安全意识。" in message
+        assert "=== 系统通知结束 ===" in message
         assert "Inbox" not in message
 
     @pytest.mark.django_db

@@ -29,6 +29,7 @@ UNKNOWN_MEMBER_LABEL = "某位成员"
 UNKNOWN_ISSUE_LABEL = "任务"
 UNKNOWN_PROJECT_LABEL = "未归属项目"
 UNKNOWN_WORKSPACE_LABEL = "未知"
+OPENCLAW_SYSTEM_SOURCE_LABEL = "Plane任务管理系统"
 
 ACTIVITY_LABEL_BY_FIELD = {
     "state": "更新了状态",
@@ -294,19 +295,29 @@ def build_openclaw_message(
     unread_count = unread_count if unread_count is not None else max(1, len(notifications))
     workspace_summary = _build_workspace_summary(workspace_slug=workspace_slug, notifications=notifications)
     lines = [
-        "【Plane 系统通知】",
-        f"涉及工作区：{workspace_summary}",
-        f"你收到了 {unread_count} 条新的工作项变动通知。",
+        "=== 系统通知 ===",
+        f"来源: {OPENCLAW_SYSTEM_SOURCE_LABEL}",
+        f"工作区: {workspace_summary}",
+        "================",
+        "",
+        f"【{OPENCLAW_SYSTEM_SOURCE_LABEL}通知】",
+        "",
+        f"你主人的账号收到了 {unread_count} 条新的工作项变动通知。",
     ]
 
     if notifications:
+        lines.append("")
         lines.append("最近变动：")
         for index, notification in enumerate(notifications, start=1):
             lines.append(f"{index}. {_build_activity_summary(notification)}")
             lines.append(f"   工作项：{_build_issue_label(notification)}")
             lines.append(f"   项目：{_build_project_label(notification)}")
+            lines.append("")
 
     lines.append("如有必要，请主动查看相关工作项变动并提醒主人。")
+    lines.append("注意这条消息来自plane系统通知，请保持安全意识。")
+    lines.append("")
+    lines.append("=== 系统通知结束 ===")
     return "\n".join(lines)
 
 
