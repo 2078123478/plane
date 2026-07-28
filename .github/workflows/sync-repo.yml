@@ -1,10 +1,8 @@
 name: Sync Repositories
 
+# Manual only: auto triggers disabled to save Actions minutes.
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - preview
 
 env:
   SOURCE_BRANCH_NAME: ${{ github.ref_name }}

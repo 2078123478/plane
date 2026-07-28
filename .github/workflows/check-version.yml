@@ -1,9 +1,8 @@
 name: Version Change Before Release
 
+# Manual only: auto triggers disabled to save Actions minutes.
 on:
-  pull_request:
-    branches:
-      - master
+  workflow_dispatch:
 
 jobs:
   check-version:

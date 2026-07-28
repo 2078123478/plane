@@ -1,16 +1,8 @@
 name: Copy Right Check
 
+# Manual only: auto triggers disabled to save Actions minutes.
 on:
-    workflow_dispatch:
-    pull_request:
-        branches:
-            - "preview"
-        types:
-            - "opened"
-            - "synchronize"
-            - "ready_for_review"
-            - "review_requested"
-            - "reopened"
+  workflow_dispatch:
 
 jobs:
     license-check:

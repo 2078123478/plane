@@ -1,5 +1,6 @@
 name: Branch Build CE
 
+# Manual only: auto triggers disabled to save Actions minutes.
 on:
   workflow_dispatch:
     inputs:
@@ -30,10 +31,6 @@ on:
         required: false
         default: false
         type: boolean
-  push:
-    branches:
-      - preview
-      - canary
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

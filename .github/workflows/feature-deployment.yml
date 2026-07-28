@@ -1,5 +1,6 @@
 name: Feature Preview
 
+# Manual only: auto triggers disabled to save Actions minutes.
 on:
   workflow_dispatch:
     inputs:

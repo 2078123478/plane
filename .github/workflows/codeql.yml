@@ -1,11 +1,8 @@
 name: "CodeQL"
 
+# Manual only: auto triggers disabled to save Actions minutes.
 on:
   workflow_dispatch:
-  push:
-    branches: ["preview", "canary", "master"]
-  pull_request:
-    branches: ["preview", "canary", "master"]
 
 jobs:
   analyze:

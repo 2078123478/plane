@@ -1,16 +1,8 @@
 name: Build and lint web apps
 
+# Manual only: auto triggers disabled to save Actions minutes.
 on:
   workflow_dispatch:
-  pull_request:
-    branches:
-      - "preview"
-    types:
-      - "opened"
-      - "synchronize"
-      - "ready_for_review"
-      - "review_requested"
-      - "reopened"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

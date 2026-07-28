@@ -2,11 +2,9 @@
 ---
 name: Codespell
 
+# Manual only: auto triggers disabled to save Actions minutes.
 on:
-  push:
-    branches: [preview]
-  pull_request:
-    branches: [preview]
+  workflow_dispatch:
 
 permissions:
   contents: read

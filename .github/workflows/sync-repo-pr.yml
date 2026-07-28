@@ -1,10 +1,8 @@
 name: Create PR on Sync
 
+# Manual only: auto triggers disabled to save Actions minutes.
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - "sync/**"
 
 env:
   CURRENT_BRANCH: ${{ github.ref_name }}

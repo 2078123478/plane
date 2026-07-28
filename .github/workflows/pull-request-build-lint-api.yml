@@ -1,18 +1,8 @@
 name: Build and lint API
 
+# Manual only: auto triggers disabled to save Actions minutes.
 on:
   workflow_dispatch:
-  pull_request:
-    branches:
-      - "preview"
-    types:
-      - "opened"
-      - "synchronize"
-      - "ready_for_review"
-      - "review_requested"
-      - "reopened"
-    paths:
-      - "apps/api/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
